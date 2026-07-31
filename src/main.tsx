@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import { BRAND, SEO } from './content/site';
 import { buildStructuredData } from './lib/structuredData';
-import { asset } from './lib/asset';
 import './index.css';
 
 /**
@@ -12,6 +11,9 @@ import './index.css';
  * static `index.html` because the site URL is an environment variable.
  */
 function applyMetadata(): void {
+  // VITE_SITE_URL already includes any subpath the site is deployed under, so
+  // the OG image is built from it directly. Running the path through asset()
+  // here would apply the base a second time.
   const canonicalUrl = BRAND.siteUrl.replace(/\/$/, '');
 
   const setMeta = (selector: string, attribute: string, value: string): void => {
@@ -20,8 +22,8 @@ function applyMetadata(): void {
 
   setMeta('link[rel="canonical"]', 'href', canonicalUrl);
   setMeta('meta[property="og:url"]', 'content', canonicalUrl);
-  setMeta('meta[property="og:image"]', 'content', `${canonicalUrl}${asset(SEO.ogImage)}`);
-  setMeta('meta[name="twitter:image"]', 'content', `${canonicalUrl}${asset(SEO.ogImage)}`);
+  setMeta('meta[property="og:image"]', 'content', `${canonicalUrl}${SEO.ogImage}`);
+  setMeta('meta[name="twitter:image"]', 'content', `${canonicalUrl}${SEO.ogImage}`);
 
   const script = document.createElement('script');
   script.type = 'application/ld+json';
