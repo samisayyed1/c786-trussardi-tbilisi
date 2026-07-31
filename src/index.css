@@ -132,6 +132,47 @@
   letter-spacing: -0.005em;
 }
 
+/**
+ * Hero scrim.
+ *
+ * A three-stop Tailwind gradient could not do this job. It left the headline
+ * sitting on the brightest part of the render with nothing behind it, then
+ * slammed to near-black at the bottom — reading as a photo stacked on a black
+ * box rather than one cinematic frame.
+ *
+ * The ramp below is tuned to where the content actually sits on a phone: the
+ * upper third stays clear so the architecture reads, it builds through the
+ * headline and copy, and it eases rather than jumps into the base. The bottom
+ * deliberately stops short of solid black — the render is already dark foliage
+ * there, so full opacity buys nothing and kills the texture.
+ */
+@utility hero-scrim {
+  background-image: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0.28) 0%,
+    rgb(0 0 0 / 0.12) 24%,
+    rgb(0 0 0 / 0.34) 40%,
+    rgb(0 0 0 / 0.62) 53%,
+    rgb(0 0 0 / 0.8) 66%,
+    rgb(0 0 0 / 0.88) 82%,
+    rgb(0 0 0 / 0.92) 100%
+  );
+
+  /* Desktop text sits left-of-centre against a wide frame, so the vertical ramp
+     can stay lighter and a horizontal wash carries the copy instead. */
+  @media (width >= 640px) {
+    background-image:
+      linear-gradient(to right, rgb(0 0 0 / 0.78) 0%, rgb(0 0 0 / 0.35) 45%, rgb(0 0 0 / 0) 75%),
+      linear-gradient(
+        to bottom,
+        rgb(0 0 0 / 0.55) 0%,
+        rgb(0 0 0 / 0.3) 30%,
+        rgb(0 0 0 / 0.5) 62%,
+        rgb(0 0 0 / 0.85) 100%
+      );
+  }
+}
+
 @utility accent-gradient {
   background-image: var(--accent-gradient);
 }
@@ -182,6 +223,31 @@
   }
   to {
     transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/**
+ * Trust-strip conveyor.
+ *
+ * Travels left → right. Two identical sequences sit side by side and the pair
+ * shifts by exactly one sequence width, so the moment the animation restarts
+ * the second copy is precisely where the first was — no jump, no gap.
+ */
+@utility trust-marquee {
+  animation: trust-conveyor 30s linear infinite;
+
+  /* Never animate for reduced-motion users, even if the class is applied. */
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes trust-conveyor {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
   }
 }
 

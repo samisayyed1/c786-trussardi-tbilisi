@@ -90,23 +90,12 @@ export function Hero({ ready }: HeroProps) {
         />
       </div>
 
-      {/* Scrim, shaped rather than flat.
-
-          A heavy even wash was flattening the render into a muddy field. The
-          weight now sits low, under the text block, and lifts off the upper
-          two-thirds so the architecture actually reads — on phones especially,
-          where the frame is mostly sky and building. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-gradient-to-b from-black/45 via-black/35 to-black/92 md:from-black/65 md:via-black/45 md:to-black/94"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-gradient-to-r from-black/40 via-transparent to-transparent md:from-black/70 md:via-black/30"
-      />
+      {/* Multi-stop cinematic ramp — see `hero-scrim` in index.css for why a
+          three-stop utility gradient was not enough here. */}
+      <div aria-hidden="true" className="hero-scrim absolute inset-0 -z-10" />
 
       <div className="shell">
-        <h1 className="max-w-4xl text-[clamp(2rem,7.6vw,5.5rem)]">
+        <h1 className="max-w-4xl text-[clamp(2rem,7.6vw,5.5rem)] [text-shadow:0_2px_30px_rgb(0_0_0/0.55)] sm:[text-shadow:none]">
           <span data-hero="line" className="block">
             Italian-Branded Living
           </span>
@@ -117,7 +106,10 @@ export function Hero({ ready }: HeroProps) {
 
         {/* Only one of these is ever displayed; the other is display:none, so
             it is not announced by assistive tech either. */}
-        <p data-hero="copy" className="mt-5 max-w-xl text-[0.9375rem] text-white/85 sm:mt-6 sm:text-base">
+        <p
+          data-hero="copy"
+          className="mt-5 max-w-xl text-[0.9375rem] text-white/85 [text-shadow:0_1px_18px_rgb(0_0_0/0.5)] sm:mt-6 sm:text-base sm:[text-shadow:none]"
+        >
           <span className="sm:hidden">{HERO_COPY.short}</span>
           <span className="hidden sm:inline">{HERO_COPY.full}</span>
         </p>

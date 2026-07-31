@@ -109,23 +109,45 @@ for (const [width, height, label] of VIEWPORTS) {
       width: Math.max(1, Math.min(target.w, width - target.x)),
       height: Math.max(1, Math.min(target.h, height - target.y)),
     };
-    const { channels } = await sharp(screenshot).extract(region).stats();
-    const background = channels.slice(0, 3).map((channel) => channel.mean);
+    // Mean background is not the honest test for text over photography. A single
+    // bright window behind one letter fails while the average looks fine, so the
+    // worst realistic case is measured too: the 95th-percentile brightest pixel
+    // in the region for light text, the 5th-percentile darkest for dark text.
+    const { data, info } = await sharp(screenshot)
+      .extract(region)
+      .raw()
+      .toBuffer({ resolveWithObject: true });
 
-    // Composite the (possibly translucent) text colour over what's behind it.
-    const foreground = target.rgb.map(
-      (channel, index) => channel * target.alpha + background[index] * (1 - target.alpha),
-    );
+    const pixels = [];
+    for (let i = 0; i < data.length; i += info.channels) {
+      pixels.push([data[i], data[i + 1], data[i + 2]]);
+    }
+
+    const mean = [0, 1, 2].map((c) => pixels.reduce((sum, px) => sum + px[c], 0) / pixels.length);
+    const textIsLight = luminance(...target.rgb) > 0.5;
+
+    const sorted = [...pixels].sort((a, b) => luminance(...a) - luminance(...b));
+    const index = textIsLight
+      ? Math.floor(sorted.length * 0.95) // brightest realistic background
+      : Math.floor(sorted.length * 0.05); // darkest realistic background
+    const worst = sorted[Math.min(index, sorted.length - 1)];
+
+    const composite = (background) =>
+      target.rgb.map((channel, i) => channel * target.alpha + background[i] * (1 - target.alpha));
+
+    const meanRatio = contrastRatio(composite(mean), mean);
+    const worstRatio = contrastRatio(composite(worst), worst);
 
     const isLarge = target.size >= 24 || (target.size >= 18.66 && Number(target.weight) >= 700);
     const required = isLarge ? 3 : 4.5;
-    const ratio = contrastRatio(foreground, background);
-    const passed = ratio >= required;
+    const passed = worstRatio >= required;
     if (!passed) failures.push(`${label}/${target.name}`);
 
     console.log(
       `${label.padEnd(8)} ${target.name.padEnd(12)} ${String(Math.round(target.size)).padStart(3)}px  ` +
-        `${ratio.toFixed(2)}:1  needs ${required}  ${passed ? '✓' : '✗ FAIL'}`,
+        `avg ${meanRatio.toFixed(1)}:1  worst ${worstRatio.toFixed(2)}:1  needs ${required}  ${
+          passed ? '✓' : '✗ FAIL'
+        }`,
     );
   }
 
