@@ -1,0 +1,162 @@
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ArrowDown } from 'lucide-react';
+import { HERO_FACTS, PROJECT } from '../content/site';
+import { MEDIA } from '../content/media-manifest';
+import { Picture } from './ui/Picture';
+import { PrimaryCta, WhatsAppCta } from './ui/Cta';
+import { useReducedMotion } from '../hooks/useReducedMotion';
+
+gsap.registerPlugin(ScrollTrigger);
+
+interface HeroProps {
+  /** Held until the intro overlay has left, so the entrance is actually seen. */
+  ready: boolean;
+}
+
+/**
+ * Full-viewport cinematic hero over the strongest official exterior render.
+ *
+ * No project video is published by the developer, so this is a still image with
+ * a slow GSAP scale — never an unrelated stock video.
+ */
+export function Hero({ ready }: HeroProps) {
+  const rootRef = useRef<HTMLElement>(null);
+  const mediaRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!ready || reducedMotion) return;
+
+    const context = gsap.context(() => {
+      const timeline = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      // fromTo, not from: both ends are stated explicitly, so a re-run can never
+      // capture an already-animated value as the target and strand an element
+      // at opacity 0.
+      // Durations are kept tight on purpose. The headline and supporting copy
+      // are the Largest Contentful Paint candidates, so every extra tenth of a
+      // second spent fading them in is a tenth added to the measured LCP.
+      timeline
+        .fromTo('[data-hero="line"]', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.75, stagger: 0.08 })
+        .fromTo(
+          '[data-hero="copy"]',
+          { opacity: 0, y: 24, filter: 'blur(7px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.55 },
+          '-=0.55',
+        )
+        .fromTo(
+          '[data-hero="cta"] > *',
+          { opacity: 0, y: 18 },
+          { opacity: 1, y: 0, duration: 0.45, stagger: 0.07 },
+          '-=0.3',
+        )
+        .fromTo(
+          '[data-hero="fact"]',
+          { opacity: 0, y: 14 },
+          { opacity: 1, y: 0, duration: 0.4, stagger: 0.05 },
+          '-=0.25',
+        )
+        .fromTo('[data-hero="scroll"]', { opacity: 0 }, { opacity: 1, duration: 0.5 }, '-=0.2');
+
+      // A very slow push-in on the still, so the frame never feels frozen.
+      gsap.to(mediaRef.current, {
+        scale: 1.09,
+        ease: 'none',
+        scrollTrigger: { trigger: rootRef.current, start: 'top top', end: 'bottom top', scrub: true },
+      });
+    }, rootRef);
+
+    // Disposes the timeline and every ScrollTrigger created inside the context.
+    return () => context.revert();
+  }, [ready, reducedMotion]);
+
+  return (
+    <section
+      id="top"
+      ref={rootRef}
+      className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden pt-28 pb-10 md:pb-14"
+    >
+      <div ref={mediaRef} className="absolute inset-0 -z-10 will-change-transform">
+        <Picture
+          asset={MEDIA.hero}
+          priority
+          sizes="100vw"
+          className="h-full w-full"
+          imgClassName="object-cover object-center"
+        />
+      </div>
+
+      {/* Scrim. Deliberately heavy through the middle band where the headline and
+          supporting copy sit, so text keeps its contrast over the bright sky. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-gradient-to-b from-black/72 via-black/65 to-black/94 md:via-black/50"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-gradient-to-r from-black/70 via-black/30 to-transparent"
+      />
+
+      <div className="shell">
+        <h1 className="max-w-4xl text-[clamp(2rem,7.6vw,5.5rem)]">
+          <span data-hero="line" className="block">
+            Italian-Branded Living
+          </span>
+          <span data-hero="line" className="block">
+            Arrives in <span className="font-display accent-text">Tbilisi</span>
+          </span>
+        </h1>
+
+        {/* Lighter than --muted: this sits over photography, not flat surface. */}
+        <p data-hero="copy" className="mt-6 max-w-xl text-[0.9375rem] text-white/82 sm:text-base">
+          Discover fully furnished studios and 1–2 bedroom residences by {PROJECT.interiorBrand} within Georgia’s first
+          branded master-planned community—presented with end-to-end investment support from C786 Realty.
+        </p>
+
+        <div data-hero="cta" className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <PrimaryCta href="#enquire" event="hero_primary_cta_click" className="w-full sm:w-auto">
+            Get Prices &amp; Availability
+          </PrimaryCta>
+          <WhatsAppCta event="hero_whatsapp_click" className="w-full sm:w-auto" />
+        </div>
+
+        <p className="mt-4 text-xs text-white/70">
+          No obligation. Receive current availability and the official project presentation.
+        </p>
+
+        {/* Key facts as an editorial line, not a spec bar: the value leads at
+            display size with the label beneath it, separated by air and hairline
+            rules rather than boxed inside a bordered strip. Wraps to two columns
+            on phones so nothing is ever clipped mid-word. */}
+        <dl className="mt-12 grid grid-cols-2 gap-x-8 gap-y-7 sm:flex sm:flex-wrap sm:items-start sm:gap-x-0 md:mt-16">
+          {HERO_FACTS.map((fact) => (
+            <div
+              data-hero="fact"
+              key={fact.label}
+              className="min-w-0 sm:border-l sm:border-white/12 sm:px-7 sm:first:border-l-0 sm:first:pl-0"
+            >
+              <dd className="text-[1.375rem] leading-none font-light tracking-tight text-[hsl(var(--text))] sm:text-[1.625rem]">
+                {fact.value}
+              </dd>
+              <dt className="mt-2.5 text-[0.625rem] tracking-[0.18em] text-white/55 uppercase">
+                {fact.label}
+                {fact.note ? <span className="ml-1.5 normal-case">· {fact.note}</span> : null}
+              </dt>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <a
+        data-hero="scroll"
+        href="#overview"
+        aria-label="Scroll to overview"
+        className="absolute right-5 bottom-8 hidden size-11 place-items-center rounded-full border border-[hsl(var(--stroke))] text-[hsl(var(--muted))] transition-colors hover:border-[hsl(var(--accent-start))] hover:text-[hsl(var(--text))] md:grid lg:right-10"
+      >
+        <ArrowDown aria-hidden="true" className="size-4 motion-safe:animate-bounce" />
+      </a>
+    </section>
+  );
+}

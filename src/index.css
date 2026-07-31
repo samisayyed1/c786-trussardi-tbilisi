@@ -1,0 +1,212 @@
+@import 'tailwindcss';
+
+/* ───────────────────────────── Fonts ─────────────────────────────
+   Self-hosted, latin subset, woff2 only. Serving these from our own origin
+   removes a third-party DNS + TLS round trip that otherwise delays first paint
+   on mobile connections. Inter ships as a single variable file covering 300–700,
+   so all five weights cost one request. */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/inter-variable.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/instrument-serif-400-italic.woff2') format('woff2');
+}
+
+@theme {
+  --color-bg: hsl(0 0% 4%);
+  --color-surface: hsl(0 0% 8%);
+  --color-surface-elevated: hsl(0 0% 11%);
+  --color-text: hsl(0 0% 96%);
+  --color-muted: hsl(0 0% 62%);
+  --color-stroke: hsl(0 0% 15%);
+  --color-accent-start: hsl(210 33% 67%);
+  --color-accent-end: hsl(211 44% 53%);
+  --color-success: hsl(145 55% 48%);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Instrument Serif', ui-serif, Georgia, serif;
+}
+
+:root {
+  /* Raw channel values so components can compose their own alpha. */
+  --bg: 0 0% 4%;
+  --surface: 0 0% 8%;
+  --surface-elevated: 0 0% 11%;
+  --text: 0 0% 96%;
+  --muted: 0 0% 62%;
+  --stroke: 0 0% 15%;
+  --accent-start: 210 33% 67%;
+  --accent-end: 211 44% 53%;
+  --success: 145 55% 48%;
+
+  --accent-gradient: linear-gradient(90deg, #89aacc 0%, #4e85bf 100%);
+
+  /* Height of the sticky mobile CTA bar, so content can clear it. */
+  --mobile-cta-height: 4.25rem;
+
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* The floating nav overlaps anchors; offset so headings aren't hidden. */
+    scroll-padding-top: 6.5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  body {
+    margin: 0;
+    background-color: hsl(var(--bg));
+    color: hsl(var(--text));
+    font-family: var(--font-sans);
+    font-weight: 300;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* Nothing on this page may scroll sideways. */
+    overflow-x: hidden;
+    /* Respect notches. */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    line-height: 1.06;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  p {
+    text-wrap: pretty;
+    margin: 0;
+  }
+
+  /* One consistent, high-contrast focus ring across the whole page. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--accent-start));
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  ::selection {
+    background: hsl(var(--accent-end));
+    color: hsl(var(--text));
+  }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+
+@utility accent-gradient {
+  background-image: var(--accent-gradient);
+}
+
+@utility accent-text {
+  background-image: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility shell {
+  width: 100%;
+  max-width: 84rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+
+  @media (width >= 768px) {
+    padding-inline: 2.5rem;
+  }
+
+  @media (width >= 1280px) {
+    padding-inline: 3.5rem;
+  }
+}
+
+/* Hides scrollbars on the intentionally swipeable mobile rails. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility marquee-track {
+  animation: marquee 46s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Entry transition for each lead-form step. Paired with a changing React `key`,
+   this replays on every step change without an animation runtime. */
+@keyframes form-step-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes form-step-in {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

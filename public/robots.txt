@@ -1,0 +1,6 @@
+# C786 Realty — Trussardi Residences, Mira Verde (Tbilisi)
+User-agent: *
+Allow: /
+
+# Replace the host below with your production domain at deploy time.
+Sitemap: https://www.example.com/sitemap.xml
