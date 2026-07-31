@@ -31,7 +31,6 @@ const TARGETS = [
   ['eyebrow', '[data-hero="eyebrow"]'],
   ['headline', 'h1'],
   ['copy', '[data-hero="copy"]'],
-  ['reassurance', '[data-hero="cta"] + p'],
   ['fact-label', '[data-hero="fact"] dt'],
   ['fact-value', '[data-hero="fact"] dd'],
 ];

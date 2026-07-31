@@ -115,13 +115,6 @@ export function Hero({ ready }: HeroProps) {
           <WhatsAppCta event="hero_whatsapp_click" className="w-full sm:w-auto" />
         </div>
 
-        {/* Reassurance is desktop-only: on a phone it becomes a third block of
-            small text competing with the render, and the same promise is
-            repeated directly above the enquiry form. */}
-        <p className="mt-4 hidden text-xs text-white/70 sm:block">
-          No obligation. Receive current availability and the official project presentation.
-        </p>
-
         {/* Three facts on a phone, all five once there is width for them. The
             value leads at display size with the label beneath — an editorial
             line separated by hairlines, not a boxed spec bar. */}
