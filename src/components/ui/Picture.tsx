@@ -2,6 +2,9 @@ import { useState, type CSSProperties } from 'react';
 import type { MediaAsset } from '../../content/media-manifest';
 import { asset as resolveAsset } from '../../lib/asset';
 
+/** Matches Tailwind's `sm` breakpoint, below which the portrait source is used. */
+const MOBILE_MEDIA = '(max-width: 639px)';
+
 interface PictureProps {
   asset: MediaAsset;
   /** The `sizes` attribute. Get this right — it decides what phones download. */
@@ -25,8 +28,8 @@ export function Picture({ asset, sizes, className = '', imgClassName = '', prior
   const [loaded, setLoaded] = useState(false);
   const isPriority = priority ?? asset.priority;
 
-  const srcSet = (format: 'avif' | 'webp'): string =>
-    asset.variants
+  const srcSet = (variants: MediaAsset['variants'], format: 'avif' | 'webp'): string =>
+    variants
       .filter((variant) => variant.format === format)
       .map((variant) => `${resolveAsset(variant.src)} ${variant.width}w`)
       .join(', ');
@@ -47,8 +50,27 @@ export function Picture({ asset, sizes, className = '', imgClassName = '', prior
       }}
     >
       <picture>
-        <source type="image/avif" srcSet={srcSet('avif')} sizes={sizes} />
-        <source type="image/webp" srcSet={srcSet('webp')} sizes={sizes} />
+        {/* Art direction first: a portrait source, where one exists, wins on
+            phones. Order matters — the browser takes the first matching
+            <source>, so these must precede the landscape set. */}
+        {asset.mobile ? (
+          <>
+            <source
+              media={MOBILE_MEDIA}
+              type="image/avif"
+              srcSet={srcSet(asset.mobile.variants, 'avif')}
+              sizes={sizes}
+            />
+            <source
+              media={MOBILE_MEDIA}
+              type="image/webp"
+              srcSet={srcSet(asset.mobile.variants, 'webp')}
+              sizes={sizes}
+            />
+          </>
+        ) : null}
+        <source type="image/avif" srcSet={srcSet(asset.variants, 'avif')} sizes={sizes} />
+        <source type="image/webp" srcSet={srcSet(asset.variants, 'webp')} sizes={sizes} />
         <img
           src={fallback ? resolveAsset(fallback.src) : undefined}
           alt={asset.alt}

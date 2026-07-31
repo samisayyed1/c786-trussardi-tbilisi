@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowDown } from 'lucide-react';
-import { HERO_FACTS, PROJECT } from '../content/site';
+import { HERO_COPY, HERO_FACTS } from '../content/site';
 import { MEDIA } from '../content/media-manifest';
 import { Picture } from './ui/Picture';
 import { PrimaryCta, WhatsAppCta } from './ui/Cta';
@@ -79,6 +79,8 @@ export function Hero({ ready }: HeroProps) {
       className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden pt-28 pb-10 md:pb-14"
     >
       <div ref={mediaRef} className="absolute inset-0 -z-10 will-change-transform">
+        {/* Phones get an art-directed portrait render (see media.config);
+            the landscape original composes badly in a tall viewport. */}
         <Picture
           asset={MEDIA.hero}
           priority
@@ -88,15 +90,19 @@ export function Hero({ ready }: HeroProps) {
         />
       </div>
 
-      {/* Scrim. Deliberately heavy through the middle band where the headline and
-          supporting copy sit, so text keeps its contrast over the bright sky. */}
+      {/* Scrim, shaped rather than flat.
+
+          A heavy even wash was flattening the render into a muddy field. The
+          weight now sits low, under the text block, and lifts off the upper
+          two-thirds so the architecture actually reads — on phones especially,
+          where the frame is mostly sky and building. */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-gradient-to-b from-black/72 via-black/65 to-black/94 md:via-black/50"
+        className="absolute inset-0 -z-10 bg-gradient-to-b from-black/45 via-black/35 to-black/92 md:from-black/65 md:via-black/45 md:to-black/94"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-gradient-to-r from-black/70 via-black/30 to-transparent"
+        className="absolute inset-0 -z-10 bg-gradient-to-r from-black/40 via-transparent to-transparent md:from-black/70 md:via-black/30"
       />
 
       <div className="shell">
@@ -109,10 +115,11 @@ export function Hero({ ready }: HeroProps) {
           </span>
         </h1>
 
-        {/* Lighter than --muted: this sits over photography, not flat surface. */}
-        <p data-hero="copy" className="mt-6 max-w-xl text-[0.9375rem] text-white/82 sm:text-base">
-          Discover fully furnished studios and 1–2 bedroom residences by {PROJECT.interiorBrand} within Georgia’s first
-          branded master-planned community—presented with end-to-end investment support from C786 Realty.
+        {/* Only one of these is ever displayed; the other is display:none, so
+            it is not announced by assistive tech either. */}
+        <p data-hero="copy" className="mt-5 max-w-xl text-[0.9375rem] text-white/85 sm:mt-6 sm:text-base">
+          <span className="sm:hidden">{HERO_COPY.short}</span>
+          <span className="hidden sm:inline">{HERO_COPY.full}</span>
         </p>
 
         <div data-hero="cta" className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -122,27 +129,31 @@ export function Hero({ ready }: HeroProps) {
           <WhatsAppCta event="hero_whatsapp_click" className="w-full sm:w-auto" />
         </div>
 
-        <p className="mt-4 text-xs text-white/70">
+        {/* Reassurance is desktop-only: on a phone it becomes a third block of
+            small text competing with the render, and the same promise is
+            repeated directly above the enquiry form. */}
+        <p className="mt-4 hidden text-xs text-white/70 sm:block">
           No obligation. Receive current availability and the official project presentation.
         </p>
 
-        {/* Key facts as an editorial line, not a spec bar: the value leads at
-            display size with the label beneath it, separated by air and hairline
-            rules rather than boxed inside a bordered strip. Wraps to two columns
-            on phones so nothing is ever clipped mid-word. */}
-        <dl className="mt-12 grid grid-cols-2 gap-x-8 gap-y-7 sm:flex sm:flex-wrap sm:items-start sm:gap-x-0 md:mt-16">
+        {/* Three facts on a phone, all five once there is width for them. The
+            value leads at display size with the label beneath — an editorial
+            line separated by hairlines, not a boxed spec bar. */}
+        <dl className="mt-9 flex items-start sm:mt-12 sm:flex-wrap sm:gap-y-6 md:mt-14">
           {HERO_FACTS.map((fact) => (
             <div
               data-hero="fact"
               key={fact.label}
-              className="min-w-0 sm:border-l sm:border-white/12 sm:px-7 sm:first:border-l-0 sm:first:pl-0"
+              className={`min-w-0 border-l border-white/15 px-3 first:border-l-0 first:pl-0 sm:px-7 ${
+                fact.compact ? '' : 'hidden sm:block'
+              }`}
             >
-              <dd className="text-[1.375rem] leading-none font-light tracking-tight text-[hsl(var(--text))] sm:text-[1.625rem]">
+              <dd className="text-[1.0625rem] leading-none font-light tracking-tight text-[hsl(var(--text))] sm:text-[1.625rem]">
                 {fact.value}
               </dd>
-              <dt className="mt-2.5 text-[0.625rem] tracking-[0.18em] text-white/55 uppercase">
+              <dt className="mt-2 text-[0.5625rem] tracking-[0.16em] text-white/70 uppercase sm:mt-2.5 sm:text-[0.625rem] sm:tracking-[0.18em] sm:text-white/58">
                 {fact.label}
-                {fact.note ? <span className="ml-1.5 normal-case">· {fact.note}</span> : null}
+                {fact.note ? <span className="ml-1.5 hidden normal-case sm:inline">· {fact.note}</span> : null}
               </dt>
             </div>
           ))}

@@ -47,12 +47,27 @@
       crossorigin
     />
 
-    <!-- The hero is the LCP element; fetch its AVIF alongside the bundle. -->
+    <!-- The hero is the LCP element, so its AVIF is fetched alongside the bundle.
+
+         Two preloads, matching the art direction in the markup: phones use a
+         portrait render, everything else the landscape one. Without the `media`
+         split the browser would preload the landscape file on mobile and then
+         never use it — pure waste on the slowest connections. -->
     <link
       rel="preload"
       as="image"
+      media="(max-width: 639px)"
+      href="/media/hero-m-729.avif"
+      imagesrcset="/media/hero-m-420.avif 420w, /media/hero-m-640.avif 640w, /media/hero-m-729.avif 729w"
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="image"
+      media="(min-width: 640px)"
       href="/media/hero-1600.avif"
-      imagesrcset="/media/hero-420.avif 420w, /media/hero-640.avif 640w, /media/hero-960.avif 960w, /media/hero-1280.avif 1280w, /media/hero-1600.avif 1600w, /media/hero-1920.avif 1920w, /media/hero-2100.avif 2100w"
+      imagesrcset="/media/hero-640.avif 640w, /media/hero-960.avif 960w, /media/hero-1280.avif 1280w, /media/hero-1600.avif 1600w, /media/hero-1920.avif 1920w, /media/hero-2100.avif 2100w"
       imagesizes="100vw"
       fetchpriority="high"
     />

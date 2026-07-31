@@ -48,11 +48,13 @@ async function readState() {
 }
 
 /** True when every derivative for this id is present and built from this exact source. */
-async function isUpToDate(state, item, sourceMtimeMs, expectedFiles) {
+async function isUpToDate(state, item, sourceMtimeMs, expectedFiles, mobileFile, mobileMtimeMs) {
   const previous = state[item.id];
   if (!previous) return false;
   if (previous.file !== item.file) return false;
   if (previous.mtimeMs !== sourceMtimeMs) return false;
+  if ((previous.mobileFile ?? null) !== (mobileFile ?? null)) return false;
+  if ((previous.mobileMtimeMs ?? null) !== (mobileMtimeMs ?? null)) return false;
 
   const present = await Promise.all(
     expectedFiles.map((name) =>
@@ -63,6 +65,54 @@ async function isUpToDate(state, item, sourceMtimeMs, expectedFiles) {
     ),
   );
   return present.every(Boolean);
+}
+
+/** Width tiers for a source, always including its native width. */
+function widthsFor(kind, sourceWidth) {
+  const tiers = kind === 'plan' ? PLAN_WIDTHS : WIDTHS;
+  const widths = tiers.filter((w) => w <= sourceWidth);
+  // Always offer the source's native width, so retina screens get every
+  // pixel the developer actually published rather than a downscaled tier.
+  if (!widths.includes(sourceWidth)) widths.push(sourceWidth);
+  return widths.sort((a, b) => a - b);
+}
+
+/** Filenames a given prefix is expected to produce. */
+function expectedNames(prefix, kind, sourceWidth) {
+  return widthsFor(kind, sourceWidth).flatMap((w) => [`${prefix}-${w}.avif`, `${prefix}-${w}.webp`]);
+}
+
+/**
+ * Encodes one source into every applicable width tier and returns its variant
+ * list. `prefix` distinguishes the art-directed mobile set from the main one.
+ */
+async function encodeVariants(input, meta, kind, prefix, skip) {
+  const widths = widthsFor(kind, meta.width);
+  const variants = [];
+  let encoded = 0;
+
+  for (const width of widths) {
+    const height = Math.round((meta.height / meta.width) * width);
+    for (const format of /** @type {const} */ (['avif', 'webp'])) {
+      const name = `${prefix}-${width}.${format}`;
+
+      if (!skip) {
+        const pipeline = sharp(input, { failOn: 'none' }).resize(width, null, { withoutEnlargement: true });
+        // Quality varies by tier and by kind — plans are line art and need
+        // their labels to stay legible; see qualityFor in media.config.
+        const quality = qualityFor(width, kind);
+        await (format === 'avif'
+          ? pipeline.avif({ quality: quality.avif, effort: 5 })
+          : pipeline.webp({ quality: quality.webp })
+        ).toFile(path.join(OUT_DIR, name));
+        encoded += 1;
+      }
+
+      variants.push({ format, width, height, src: `/media/${name}` });
+    }
+  }
+
+  return { variants, encoded };
 }
 
 async function main() {
@@ -77,42 +127,24 @@ async function main() {
     const meta = await image.metadata();
     if (!meta.width || !meta.height) throw new Error(`Unreadable dimensions for ${item.file}`);
 
-    const tiers = item.kind === 'plan' ? PLAN_WIDTHS : WIDTHS;
-    const widths = tiers.filter((w) => w <= meta.width);
-    // Always offer the source's native width, so retina screens get every
-    // pixel the developer actually published rather than a downscaled tier.
-    if (!widths.includes(meta.width)) widths.push(meta.width);
-    widths.sort((a, b) => a - b);
-
     const { mtimeMs } = await fs.stat(input);
-    const variants = [];
 
-    const expectedFiles = widths.flatMap((width) => [`${item.id}-${width}.avif`, `${item.id}-${width}.webp`]);
-    const skip = await isUpToDate(previousState, item, mtimeMs, expectedFiles);
-    let encoded = 0;
+    // Optional art-directed portrait source for phones.
+    const mobileInput = item.mobileFile ? path.join(SRC_DIR, item.mobileFile) : null;
+    const mobileMeta = mobileInput ? await sharp(mobileInput).metadata() : null;
+    const mobileMtimeMs = mobileInput ? (await fs.stat(mobileInput)).mtimeMs : null;
 
-    for (const width of widths) {
-      const height = Math.round((meta.height / meta.width) * width);
-      for (const format of /** @type {const} */ (['avif', 'webp'])) {
-        const name = `${item.id}-${width}.${format}`;
+    const expectedFiles = expectedNames(item.id, item.kind, meta.width);
+    if (mobileMeta) expectedFiles.push(...expectedNames(`${item.id}-m`, item.kind, mobileMeta.width));
 
-        if (!skip) {
-          const pipeline = sharp(input, { failOn: 'none' }).resize(width, null, { withoutEnlargement: true });
-          // Quality varies by tier and by kind — plans are line art and need
-          // their labels to stay legible; see qualityFor in media.config.
-          const quality = qualityFor(width, item.kind);
-          await (format === 'avif'
-            ? pipeline.avif({ quality: quality.avif, effort: 5 })
-            : pipeline.webp({ quality: quality.webp })
-          ).toFile(path.join(OUT_DIR, name));
-          encoded += 1;
-        }
+    const skip = await isUpToDate(previousState, item, mtimeMs, expectedFiles, item.mobileFile, mobileMtimeMs);
 
-        variants.push({ format, width, height, src: `/media/${name}` });
-      }
-    }
+    const main = await encodeVariants(input, meta, item.kind, item.id, skip);
+    const mobile = mobileMeta
+      ? await encodeVariants(mobileInput, mobileMeta, item.kind, `${item.id}-m`, skip)
+      : null;
 
-    nextState[item.id] = { file: item.file, mtimeMs };
+    nextState[item.id] = { file: item.file, mtimeMs, mobileFile: item.mobileFile ?? null, mobileMtimeMs };
 
     entries.push({
       id: item.id,
@@ -125,12 +157,24 @@ async function main() {
       width: meta.width,
       height: meta.height,
       lqip: await makeLqip(input),
-      variants,
+      variants: main.variants,
+      ...(mobile
+        ? {
+            mobile: {
+              alt: item.mobileAlt ?? item.alt,
+              width: mobileMeta.width,
+              height: mobileMeta.height,
+              variants: mobile.variants,
+            },
+          }
+        : {}),
     });
 
+    const encoded = main.encoded + (mobile?.encoded ?? 0);
+    const total = main.variants.length + (mobile?.variants.length ?? 0);
     process.stdout.write(
-      `  ✓ ${item.id} (${meta.width}×${meta.height}) — ${
-        encoded === 0 ? 'up to date' : `encoded ${encoded}/${variants.length}`
+      `  ✓ ${item.id} (${meta.width}×${meta.height}${mobileMeta ? ' + portrait' : ''}) — ${
+        encoded === 0 ? 'up to date' : `encoded ${encoded}/${total}`
       }\n`,
     );
   }
@@ -163,6 +207,16 @@ export interface MediaAsset {
   readonly priority: boolean;
   /** Included in the cinematic project gallery when true. */
   readonly gallery: boolean;
+  /**
+   * Art-directed portrait source for phones. Present only where the landscape
+   * original composes badly in a tall viewport.
+   */
+  readonly mobile?: {
+    readonly alt: string;
+    readonly width: number;
+    readonly height: number;
+    readonly variants: readonly MediaVariant[];
+  };
   readonly width: number;
   readonly height: number;
   /** Inlined blurred preview used to avoid a flash of empty space. */
@@ -187,7 +241,11 @@ ${entries
   // Remove derivatives from previous runs that nothing references any more.
   // Changing the width tiers or repointing an id otherwise leaves orphans
   // behind, which ship in the build and bloat the deploy.
-  const referenced = new Set(entries.flatMap((entry) => entry.variants.map((v) => path.basename(v.src))));
+  const referenced = new Set(
+    entries.flatMap((entry) =>
+      [...entry.variants, ...(entry.mobile?.variants ?? [])].map((v) => path.basename(v.src)),
+    ),
+  );
   const onDisk = await fs.readdir(OUT_DIR);
   const orphans = onDisk.filter((name) => /\.(avif|webp)$/.test(name) && !referenced.has(name));
   await Promise.all(orphans.map((name) => fs.unlink(path.join(OUT_DIR, name))));

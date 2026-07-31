@@ -74,6 +74,9 @@ for (const [width, height, label] of VIEWPORTS) {
       const element = document.querySelector(selector);
       if (!element) continue;
       const rect = element.getBoundingClientRect();
+      // Skip anything not actually painted at this breakpoint — a display:none
+      // element still reports a colour, which would produce a meaningless ratio.
+      if (rect.width < 1 || rect.height < 1) continue;
       const styles = getComputedStyle(element);
       const { rgb, alpha } = toRgba(styles.color);
       out.push({

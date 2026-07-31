@@ -42,6 +42,11 @@ export interface KeyFact {
   readonly value: string;
   /** Optional qualifier rendered as small print beneath the value. */
   readonly note?: string;
+  /**
+   * Shown in the compact mobile hero. Keep this to three at most — the phone
+   * hero has to stay minimal so the render behind it can breathe.
+   */
+  readonly compact?: boolean;
 }
 
 export interface Residence {
@@ -155,12 +160,25 @@ export const PROJECT = {
 } as const;
 
 export const HERO_FACTS: readonly KeyFact[] = [
-  { label: 'Starting from', value: PROJECT.startingPrice, note: 'Studios' },
+  { label: 'Starting from', value: PROJECT.startingPrice, note: 'Studios', compact: true },
   { label: 'Residences', value: 'Studio, 1 & 2 bed' },
-  { label: 'Areas from', value: PROJECT.areaFrom },
+  { label: 'Areas from', value: PROJECT.areaFrom, compact: true },
   { label: 'Payment plan', value: PROJECT.paymentPlanLabel },
-  { label: 'Handover', value: PROJECT.handover },
+  { label: 'Handover', value: PROJECT.handover, compact: true },
 ];
+
+/**
+ * Hero supporting copy.
+ *
+ * Two lengths on purpose. The full sentence carries the whole proposition on a
+ * desktop hero that has room for it; on a phone the same sentence runs to five
+ * lines and buries the render, so the short form leads with what actually
+ * matters and the detail is picked up again in the overview section below.
+ */
+export const HERO_COPY = {
+  full: `Discover fully furnished studios and 1–2 bedroom residences by ${PROJECT.interiorBrand} within Georgia’s first branded master-planned community—presented with end-to-end investment support from C786 Realty.`,
+  short: `Fully furnished residences by ${PROJECT.interiorBrand}, in Georgia’s first branded community.`,
+} as const;
 
 export const TRUST_POINTS: readonly string[] = [
   'Dubai-based developer',

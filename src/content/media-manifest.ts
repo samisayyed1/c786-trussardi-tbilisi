@@ -23,6 +23,16 @@ export interface MediaAsset {
   readonly priority: boolean;
   /** Included in the cinematic project gallery when true. */
   readonly gallery: boolean;
+  /**
+   * Art-directed portrait source for phones. Present only where the landscape
+   * original composes badly in a tall viewport.
+   */
+  readonly mobile?: {
+    readonly alt: string;
+    readonly width: number;
+    readonly height: number;
+    readonly variants: readonly MediaVariant[];
+  };
   readonly width: number;
   readonly height: number;
   /** Inlined blurred preview used to avoid a flash of empty space. */
@@ -129,7 +139,50 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
         "height": 1568,
         "src": "/media/hero-2100.webp"
       }
-    ]
+    ],
+    "mobile": {
+      "alt": "Dusk render of the illuminated Mira Verde residences stepping down the wooded hillside.",
+      "width": 729,
+      "height": 1083,
+      "variants": [
+        {
+          "format": "avif",
+          "width": 420,
+          "height": 624,
+          "src": "/media/hero-m-420.avif"
+        },
+        {
+          "format": "webp",
+          "width": 420,
+          "height": 624,
+          "src": "/media/hero-m-420.webp"
+        },
+        {
+          "format": "avif",
+          "width": 640,
+          "height": 951,
+          "src": "/media/hero-m-640.avif"
+        },
+        {
+          "format": "webp",
+          "width": 640,
+          "height": 951,
+          "src": "/media/hero-m-640.webp"
+        },
+        {
+          "format": "avif",
+          "width": 729,
+          "height": 1083,
+          "src": "/media/hero-m-729.avif"
+        },
+        {
+          "format": "webp",
+          "width": 729,
+          "height": 1083,
+          "src": "/media/hero-m-729.webp"
+        }
+      ]
+    }
   },
   "overview-aerial": {
     "id": "overview-aerial",

@@ -32,6 +32,17 @@ export const MEDIA = [
     caption: 'Trussardi Residences — exterior render at dusk',
     source: OFFICIAL_MIRA_VERDE,
     priority: true,
+    /**
+     * Art direction, not just a smaller crop.
+     *
+     * The landscape render is composed for a wide frame. Dropped into a phone
+     * viewport — roughly 1:2 — object-cover fills vertically with no crop, so
+     * the top half is empty sky and the architecture disappears behind the
+     * text. This portrait render of the same community fills the frame instead.
+     */
+    mobileFile: 'mv2_68.webp',
+    mobileAlt:
+      'Dusk render of the illuminated Mira Verde residences stepping down the wooded hillside.',
   },
   {
     id: 'overview-aerial',
