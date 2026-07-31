@@ -43,6 +43,7 @@ export const MEDIA = [
     mobileFile: 'mv2_68.webp',
     mobileAlt:
       'Dusk render of the illuminated Mira Verde residences stepping down the wooded hillside.',
+    heroOrder: 1,
   },
   {
     id: 'overview-aerial',
@@ -141,8 +142,9 @@ export const MEDIA = [
     alt: 'Residences glowing at blue hour, stepping down the hillside among mature trees.',
     caption: 'Residences at blue hour — exterior render',
     source: OFFICIAL_TRUSSARDI,
-    priority: false,
     gallery: true,
+    heroOrder: 2,
+    mobileCrop: [2, 3],
   },
   {
     id: 'exterior-walkway',
@@ -152,6 +154,8 @@ export const MEDIA = [
     caption: 'Residential walkway at night — exterior render',
     source: OFFICIAL_TRUSSARDI,
     gallery: true,
+    heroOrder: 4,
+    mobileCrop: [2, 3],
   },
   {
     id: 'exterior-entrance',
@@ -161,6 +165,8 @@ export const MEDIA = [
     caption: 'Arrival colonnade — exterior render',
     source: OFFICIAL_MIRA_VERDE,
     gallery: true,
+    heroOrder: 3,
+    mobileCrop: [2, 3],
   },
   {
     id: 'exterior-facade',
@@ -179,6 +185,8 @@ export const MEDIA = [
     caption: 'Stepped residences at sunset — exterior render',
     source: OFFICIAL_MIRA_VERDE,
     gallery: true,
+    heroOrder: 5,
+    mobileCrop: [2, 3],
   },
   {
     id: 'location-aerial',

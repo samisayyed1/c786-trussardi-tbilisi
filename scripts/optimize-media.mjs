@@ -67,6 +67,11 @@ async function isUpToDate(state, item, sourceMtimeMs, expectedFiles, mobileFile,
   return present.every(Boolean);
 }
 
+/** Height for a given width under a [w, h] aspect ratio. */
+function cropHeight(width, [aw, ah]) {
+  return Math.round((width * ah) / aw);
+}
+
 /** Width tiers for a source, always including its native width. */
 function widthsFor(kind, sourceWidth) {
   const tiers = kind === 'plan' ? PLAN_WIDTHS : WIDTHS;
@@ -86,18 +91,29 @@ function expectedNames(prefix, kind, sourceWidth) {
  * Encodes one source into every applicable width tier and returns its variant
  * list. `prefix` distinguishes the art-directed mobile set from the main one.
  */
-async function encodeVariants(input, meta, kind, prefix, skip) {
-  const widths = widthsFor(kind, meta.width);
+async function encodeVariants(input, meta, kind, prefix, skip, cropAspect) {
+  // A crop changes the effective source width: a 2:3 portrait taken from a
+  // landscape render can only be as wide as its height allows.
+  const effectiveWidth = cropAspect
+    ? Math.min(meta.width, Math.round(meta.height * (cropAspect[0] / cropAspect[1])))
+    : meta.width;
+  const widths = widthsFor(kind, effectiveWidth);
   const variants = [];
   let encoded = 0;
 
   for (const width of widths) {
-    const height = Math.round((meta.height / meta.width) * width);
+    const height = cropAspect ? cropHeight(width, cropAspect) : Math.round((meta.height / meta.width) * width);
     for (const format of /** @type {const} */ (['avif', 'webp'])) {
       const name = `${prefix}-${width}.${format}`;
 
       if (!skip) {
-        const pipeline = sharp(input, { failOn: 'none' }).resize(width, null, { withoutEnlargement: true });
+        const pipeline = cropAspect
+          ? sharp(input, { failOn: 'none' }).resize(width, cropHeight(width, cropAspect), {
+              fit: 'cover',
+              position: 'centre',
+              withoutEnlargement: true,
+            })
+          : sharp(input, { failOn: 'none' }).resize(width, null, { withoutEnlargement: true });
         // Quality varies by tier and by kind — plans are line art and need
         // their labels to stay legible; see qualityFor in media.config.
         const quality = qualityFor(width, kind);
@@ -129,22 +145,45 @@ async function main() {
 
     const { mtimeMs } = await fs.stat(input);
 
-    // Optional art-directed portrait source for phones.
-    const mobileInput = item.mobileFile ? path.join(SRC_DIR, item.mobileFile) : null;
-    const mobileMeta = mobileInput ? await sharp(mobileInput).metadata() : null;
-    const mobileMtimeMs = mobileInput ? (await fs.stat(mobileInput)).mtimeMs : null;
+    // Optional art-directed portrait for phones: either a separate render
+    // (mobileFile) or a centre crop of this same source (mobileCrop).
+    const mobileInput = item.mobileFile ? path.join(SRC_DIR, item.mobileFile) : item.mobileCrop ? input : null;
+    const mobileMeta = mobileInput
+      ? item.mobileFile
+        ? await sharp(mobileInput).metadata()
+        : meta
+      : null;
+    const mobileMtimeMs = item.mobileFile ? (await fs.stat(mobileInput)).mtimeMs : null;
+    const crop = item.mobileFile ? undefined : item.mobileCrop;
+
+    const mobileEffectiveWidth =
+      mobileMeta && crop
+        ? Math.min(mobileMeta.width, Math.round(mobileMeta.height * (crop[0] / crop[1])))
+        : mobileMeta?.width;
 
     const expectedFiles = expectedNames(item.id, item.kind, meta.width);
-    if (mobileMeta) expectedFiles.push(...expectedNames(`${item.id}-m`, item.kind, mobileMeta.width));
+    if (mobileMeta) expectedFiles.push(...expectedNames(`${item.id}-m`, item.kind, mobileEffectiveWidth));
 
-    const skip = await isUpToDate(previousState, item, mtimeMs, expectedFiles, item.mobileFile, mobileMtimeMs);
+    const skip = await isUpToDate(
+      previousState,
+      item,
+      mtimeMs,
+      expectedFiles,
+      item.mobileFile ?? (item.mobileCrop ? `crop:${item.mobileCrop.join('x')}` : null),
+      mobileMtimeMs,
+    );
 
     const main = await encodeVariants(input, meta, item.kind, item.id, skip);
     const mobile = mobileMeta
-      ? await encodeVariants(mobileInput, mobileMeta, item.kind, `${item.id}-m`, skip)
+      ? await encodeVariants(mobileInput, mobileMeta, item.kind, `${item.id}-m`, skip, crop)
       : null;
 
-    nextState[item.id] = { file: item.file, mtimeMs, mobileFile: item.mobileFile ?? null, mobileMtimeMs };
+    nextState[item.id] = {
+      file: item.file,
+      mtimeMs,
+      mobileFile: item.mobileFile ?? (item.mobileCrop ? `crop:${item.mobileCrop.join('x')}` : null),
+      mobileMtimeMs,
+    };
 
     entries.push({
       id: item.id,
@@ -154,6 +193,7 @@ async function main() {
       source: item.source,
       priority: Boolean(item.priority),
       gallery: Boolean(item.gallery),
+      heroOrder: item.heroOrder ?? null,
       width: meta.width,
       height: meta.height,
       lqip: await makeLqip(input),
@@ -162,8 +202,8 @@ async function main() {
         ? {
             mobile: {
               alt: item.mobileAlt ?? item.alt,
-              width: mobileMeta.width,
-              height: mobileMeta.height,
+              width: mobile.variants[mobile.variants.length - 1].width,
+              height: mobile.variants[mobile.variants.length - 1].height,
               variants: mobile.variants,
             },
           }
@@ -207,6 +247,8 @@ export interface MediaAsset {
   readonly priority: boolean;
   /** Included in the cinematic project gallery when true. */
   readonly gallery: boolean;
+  /** Position in the hero slideshow, or null if not a hero slide. */
+  readonly heroOrder: number | null;
   /**
    * Art-directed portrait source for phones. Present only where the landscape
    * original composes badly in a tall viewport.
@@ -227,6 +269,15 @@ export interface MediaAsset {
 export type MediaId = ${ids.map((id) => `'${id}'`).join(' | ')};
 
 export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = ${JSON.stringify(byId, null, 2)} as const;
+
+/** Hero slideshow, in declared order. The first entry is the LCP image. */
+export const HERO_MEDIA: readonly MediaAsset[] = [
+${entries
+  .filter((entry) => entry.heroOrder !== null)
+  .sort((a, b) => a.heroOrder - b.heroOrder)
+  .map((entry) => `  MEDIA['${entry.id}'],`)
+  .join('\n')}
+];
 
 export const GALLERY_MEDIA: readonly MediaAsset[] = [
 ${entries

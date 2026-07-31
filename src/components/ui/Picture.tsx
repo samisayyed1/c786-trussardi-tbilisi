@@ -12,6 +12,11 @@ interface PictureProps {
   className?: string;
   /** Applied to the <img> itself, e.g. object-cover positioning. */
   imgClassName?: string;
+  /**
+   * Replaces the asset's alt text. Pass '' for a decorative repeat of an image
+   * already described elsewhere on the page.
+   */
+  altOverride?: string;
   /** Overrides the asset's own priority flag. */
   priority?: boolean;
   style?: CSSProperties;
@@ -24,7 +29,15 @@ interface PictureProps {
  * space and the page does not shift as media arrives. A blurred inline preview
  * covers the decode gap and fades out once the full image paints.
  */
-export function Picture({ asset, sizes, className = '', imgClassName = '', priority, style }: PictureProps) {
+export function Picture({
+  asset,
+  sizes,
+  className = '',
+  imgClassName = '',
+  priority,
+  style,
+  altOverride,
+}: PictureProps) {
   const [loaded, setLoaded] = useState(false);
   const isPriority = priority ?? asset.priority;
 
@@ -73,7 +86,7 @@ export function Picture({ asset, sizes, className = '', imgClassName = '', prior
         <source type="image/webp" srcSet={srcSet(asset.variants, 'webp')} sizes={sizes} />
         <img
           src={fallback ? resolveAsset(fallback.src) : undefined}
-          alt={asset.alt}
+          alt={altOverride ?? asset.alt}
           width={asset.width}
           height={asset.height}
           loading={isPriority ? 'eager' : 'lazy'}

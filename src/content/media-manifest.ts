@@ -23,6 +23,8 @@ export interface MediaAsset {
   readonly priority: boolean;
   /** Included in the cinematic project gallery when true. */
   readonly gallery: boolean;
+  /** Position in the hero slideshow, or null if not a hero slide. */
+  readonly heroOrder: number | null;
   /**
    * Art-directed portrait source for phones. Present only where the landscape
    * original composes badly in a tall viewport.
@@ -51,6 +53,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": true,
     "gallery": false,
+    "heroOrder": 1,
     "width": 2100,
     "height": 1568,
     "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAADQAwCdASoUAA8APwlwr0+rpqQiMAgBcCEJYwCdMoABbzZczRjWPjgAyybjDC9RxT9KBObUM5sa+FwHDU6YVCE0v9M+PxNF9uIq6kxs1AAAAA==",
@@ -192,6 +195,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://trussardi-residences.ge/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 1920,
     "height": 1069,
     "lqip": "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAADQAwCdASoUAAsAPwlwsVArpiSisAgBcCEJZQAAW54uueobfPhrXIAA/nO7kCUBBeoB4YbNfQDziwmqDv4PGqyAAAA=",
@@ -278,6 +282,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 1920,
     "height": 1059,
     "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAACQAwCdASoUAAsAPwlurk+rpiQiMAgBcCEJYwC7AB3LwCKTjEmMAP3STCAf3fPL7hpn++DdZsyjPT9p/iqXiWooKHTaAAAA",
@@ -364,6 +369,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 1920,
     "height": 1059,
     "lqip": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAADQAwCdASoUAAsAPwlwr1ArpqQisAgBcCEJZQCdMoADR1tKmNxfVAAA/pQDGMA2YoHP7YL52SCdNaxw/pXglTRReIZ9dJPhb6rW/yl8KhH3AAAA",
@@ -450,6 +456,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 1920,
     "height": 1072,
     "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAABwAwCdASoUAAsAPwlysFArpySisAgBcCEJYwCdMoABCKkYMcAA/c0srXAInotV2Joce2eeHjknO5usBx1nXNjWUVQLkcAA",
@@ -536,6 +543,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 1920,
     "height": 1059,
     "lqip": "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAABwAwCdASoUAAsAPwlysVArpqSisAgBcCEJYwCdABGvSTVU1AAA/FyMTW9kneaDtFH/7EgzM9Tgo1zx5KAwgQAA",
@@ -622,6 +630,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 1920,
     "height": 1282,
     "lqip": "data:image/webp;base64,UklGRlgAAABXRUJQVlA4IEwAAACwAwCdASoUAA0APwlurk+rpiQiMAgBcCEJaAC06BZp8oHJagg4AAD+6tv9pJr1B6qK0LYBRWLulpyXh3W9o8GfCS4yUxUWLJeW9DgA",
@@ -708,6 +717,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://trussardi-residences.ge/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 2100,
     "height": 1172,
     "lqip": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAACQAwCdASoUAAsAPwlwr0+rpqQiMAgBcCEJYwCdABr9qweDqRAAAP6DG2LJezaEAv820wY4OrBHdTREZcxJoTnzGuZWJfIAAAA=",
@@ -806,6 +816,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 1920,
     "height": 1434,
     "lqip": "data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAADwAwCdASoUAA8APwlwr0+rpqQiMAgBcCEJQBOmUGUgCBjRPQuFNOCAANq6nek0E71hB8u0zH5u8o8roFPzx80RKSxitIoT4VbHrfzZ+AA=",
@@ -892,6 +903,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 1919,
     "height": 1057,
     "lqip": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAACQAwCdASoUAAsAPwlwr1ArpqQisAgBcCEJQBOgA4OsQOpBmmoAAP6pjMfJRu9arijoV9l78mO/WfhRRRSj0DWpb906UgdjUAA=",
@@ -978,6 +990,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://trussardi-residences.ge/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 1920,
     "height": 1080,
     "lqip": "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAADQAwCdASoUAAsAPwlwr0+rpqQiMAgBcCEJQBOmUABqUO5yPmrRTtAA/scFiuQIDrWBcwKFWv2F/HHZ/MF0oKxAAAA=",
@@ -1064,6 +1077,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://trussardi-residences.ge/",
     "priority": false,
     "gallery": true,
+    "heroOrder": 2,
     "width": 1920,
     "height": 1083,
     "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAACwAwCdASoUAAsAPwlyr0+rpyQiMAgBcCEJZQC7ACHW3GE0TS+NIAD+ohOdX433ZvBW1RmZYpqJlm+X9nhE8vvGfUTXMAAA",
@@ -1140,7 +1154,50 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
         "height": 1083,
         "src": "/media/exterior-evening-1920.webp"
       }
-    ]
+    ],
+    "mobile": {
+      "alt": "Residences glowing at blue hour, stepping down the hillside among mature trees.",
+      "width": 722,
+      "height": 1083,
+      "variants": [
+        {
+          "format": "avif",
+          "width": 420,
+          "height": 630,
+          "src": "/media/exterior-evening-m-420.avif"
+        },
+        {
+          "format": "webp",
+          "width": 420,
+          "height": 630,
+          "src": "/media/exterior-evening-m-420.webp"
+        },
+        {
+          "format": "avif",
+          "width": 640,
+          "height": 960,
+          "src": "/media/exterior-evening-m-640.avif"
+        },
+        {
+          "format": "webp",
+          "width": 640,
+          "height": 960,
+          "src": "/media/exterior-evening-m-640.webp"
+        },
+        {
+          "format": "avif",
+          "width": 722,
+          "height": 1083,
+          "src": "/media/exterior-evening-m-722.avif"
+        },
+        {
+          "format": "webp",
+          "width": 722,
+          "height": 1083,
+          "src": "/media/exterior-evening-m-722.webp"
+        }
+      ]
+    }
   },
   "exterior-walkway": {
     "id": "exterior-walkway",
@@ -1150,6 +1207,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://trussardi-residences.ge/",
     "priority": false,
     "gallery": true,
+    "heroOrder": 4,
     "width": 1920,
     "height": 1084,
     "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAACwAwCdASoUAAsAPwlwsE+rpqSiMAgBcCEJZQCdAB4+r6gjkBRXAAD+6/42qtB/d/SVvjmOR1sW4zcI6ltfQrbTXp34AAAA",
@@ -1226,7 +1284,50 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
         "height": 1084,
         "src": "/media/exterior-walkway-1920.webp"
       }
-    ]
+    ],
+    "mobile": {
+      "alt": "Lantern-lit pedestrian walkway running between residential blocks at night.",
+      "width": 723,
+      "height": 1085,
+      "variants": [
+        {
+          "format": "avif",
+          "width": 420,
+          "height": 630,
+          "src": "/media/exterior-walkway-m-420.avif"
+        },
+        {
+          "format": "webp",
+          "width": 420,
+          "height": 630,
+          "src": "/media/exterior-walkway-m-420.webp"
+        },
+        {
+          "format": "avif",
+          "width": 640,
+          "height": 960,
+          "src": "/media/exterior-walkway-m-640.avif"
+        },
+        {
+          "format": "webp",
+          "width": 640,
+          "height": 960,
+          "src": "/media/exterior-walkway-m-640.webp"
+        },
+        {
+          "format": "avif",
+          "width": 723,
+          "height": 1085,
+          "src": "/media/exterior-walkway-m-723.avif"
+        },
+        {
+          "format": "webp",
+          "width": 723,
+          "height": 1085,
+          "src": "/media/exterior-walkway-m-723.webp"
+        }
+      ]
+    }
   },
   "exterior-entrance": {
     "id": "exterior-entrance",
@@ -1236,6 +1337,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": false,
     "gallery": true,
+    "heroOrder": 3,
     "width": 1920,
     "height": 1080,
     "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAAAwBACdASoUAAsAPwlwr1ArpiQisAgBcCEJQBOmUABd/2b05WAkreYmswAA/qkmiyns+1wl5hGisX2HWfDGWcSacJL5BqPUIAuJuw27PD/AAA==",
@@ -1312,7 +1414,50 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
         "height": 1080,
         "src": "/media/exterior-entrance-1920.webp"
       }
-    ]
+    ],
+    "mobile": {
+      "alt": "Arrival colonnade with slatted timber soffits and planting, lit warmly at sunset.",
+      "width": 720,
+      "height": 1080,
+      "variants": [
+        {
+          "format": "avif",
+          "width": 420,
+          "height": 630,
+          "src": "/media/exterior-entrance-m-420.avif"
+        },
+        {
+          "format": "webp",
+          "width": 420,
+          "height": 630,
+          "src": "/media/exterior-entrance-m-420.webp"
+        },
+        {
+          "format": "avif",
+          "width": 640,
+          "height": 960,
+          "src": "/media/exterior-entrance-m-640.avif"
+        },
+        {
+          "format": "webp",
+          "width": 640,
+          "height": 960,
+          "src": "/media/exterior-entrance-m-640.webp"
+        },
+        {
+          "format": "avif",
+          "width": 720,
+          "height": 1080,
+          "src": "/media/exterior-entrance-m-720.avif"
+        },
+        {
+          "format": "webp",
+          "width": 720,
+          "height": 1080,
+          "src": "/media/exterior-entrance-m-720.webp"
+        }
+      ]
+    }
   },
   "exterior-facade": {
     "id": "exterior-facade",
@@ -1322,6 +1467,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 1920,
     "height": 1434,
     "lqip": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAACwAwCdASoUAA8APwlwsFArpiSisAgBcCEJZQCdAB5n6s+rgxaTAADOHjCSEM6QQ1prb8YbYBv3B0QGc72aYVNFR9ilsVhwAAA=",
@@ -1408,6 +1554,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": false,
     "gallery": true,
+    "heroOrder": 5,
     "width": 1920,
     "height": 1080,
     "lqip": "data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAADQAwCdASoUAAsAPwlysVArpqSisAgBcCEJQBOgA3EfK2hcWzgyJQAA/HHok9g5lHDJZmZP4X2FkUSpHbALId1/tnWmHBkCSdtgAA==",
@@ -1484,7 +1631,50 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
         "height": 1080,
         "src": "/media/exterior-sunset-1920.webp"
       }
-    ]
+    ],
+    "mobile": {
+      "alt": "Stepped residences catching an orange sunset across the wooded ridge.",
+      "width": 720,
+      "height": 1080,
+      "variants": [
+        {
+          "format": "avif",
+          "width": 420,
+          "height": 630,
+          "src": "/media/exterior-sunset-m-420.avif"
+        },
+        {
+          "format": "webp",
+          "width": 420,
+          "height": 630,
+          "src": "/media/exterior-sunset-m-420.webp"
+        },
+        {
+          "format": "avif",
+          "width": 640,
+          "height": 960,
+          "src": "/media/exterior-sunset-m-640.avif"
+        },
+        {
+          "format": "webp",
+          "width": 640,
+          "height": 960,
+          "src": "/media/exterior-sunset-m-640.webp"
+        },
+        {
+          "format": "avif",
+          "width": 720,
+          "height": 1080,
+          "src": "/media/exterior-sunset-m-720.avif"
+        },
+        {
+          "format": "webp",
+          "width": 720,
+          "height": 1080,
+          "src": "/media/exterior-sunset-m-720.webp"
+        }
+      ]
+    }
   },
   "location-aerial": {
     "id": "location-aerial",
@@ -1494,6 +1684,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 2100,
     "height": 1181,
     "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAAAQBACdASoUAAsAPwl0s1CrpySisAgBcCEJYwCdIHADFFzXgezL/Z2uwAD8bj95kGjbBQMJRGXORkpROsCuc8+4pgQtYAAA",
@@ -1592,6 +1783,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://mira-verde.com/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 2400,
     "height": 1234,
     "lqip": "data:image/webp;base64,UklGRkgAAABXRUJQVlA4IDwAAABwAwCdASoUAAoAPwlyr1ArpyQisAgBcCEJZQC/OB8rE2LzBAAA/svn1DP5PnHmuJI5TyM1Prqw1SZAAAA=",
@@ -1690,6 +1882,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://trussardi-residences.ge/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 1280,
     "height": 1920,
     "lqip": "data:image/webp;base64,UklGRnAAAABXRUJQVlA4IGQAAADwBACdASoUAB4APwlyrE+rpyQiMBgMAXAhCWUAuwAKJNinf5PvU23ZUrPW/LFZTuwA+dOH9Kxwukx2Dlye05S6PI9tu6HVlO2vxgDQrTSbL3jg61ckjNaMlrCDPaoC0VUnGAAA",
@@ -1752,6 +1945,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://trussardi-residences.ge/",
     "priority": false,
     "gallery": true,
+    "heroOrder": null,
     "width": 1920,
     "height": 1280,
     "lqip": "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAACwAwCdASoUAA0APwlur0+rpiQiMAgBcCEJZwDDNB6WBnpXRbECgAD+mR425VrnO7taHU43DDoivzZRXO6Su9OgAAA=",
@@ -1838,6 +2032,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://trussardi-residences.ge/",
     "priority": false,
     "gallery": false,
+    "heroOrder": null,
     "width": 695,
     "height": 395,
     "lqip": "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAADQAwCdASoUAAsAPwlyr0+rpyQiMAgBcCEJZwDA3CPTZN0RA+UpEAAA/tV3cI4l0I49kXmEtED4S36d882gAA==",
@@ -1876,6 +2071,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://trussardi-residences.ge/",
     "priority": false,
     "gallery": false,
+    "heroOrder": null,
     "width": 627,
     "height": 552,
     "lqip": "data:image/webp;base64,UklGRlgAAABXRUJQVlA4IEwAAABQBACdASoUABIAPu1kp0+ppaOiN+gBMB2JZwAAiHDcczIEDD7Kr/REMBcAAP7UAkoM4fdBOijkBkvugz6NvRkCjNDuaCLxHb4TTHAA",
@@ -1902,6 +2098,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://trussardi-residences.ge/",
     "priority": false,
     "gallery": false,
+    "heroOrder": null,
     "width": 779,
     "height": 503,
     "lqip": "data:image/webp;base64,UklGRkgAAABXRUJQVlA4IDwAAACQAwCdASoUAA0APwlyr0+rpyQiMAgBcCEJZwDImCHR7xRhSRoAAP7Eim2r8q/pdBIqeLDboaPzpAsAAAA=",
@@ -1940,6 +2137,7 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     "source": "https://trussardi-residences.ge/",
     "priority": false,
     "gallery": false,
+    "heroOrder": null,
     "width": 1920,
     "height": 1072,
     "lqip": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADQAwCdASoUAAsAPwlwr1ArpiQisAgBcCEJZQCdACHcGZC0/SIzkhAA/uQRhitN9E9h1Oi6DucgKziOQGlZKve/3/4MZAFgAAA=",
@@ -2019,6 +2217,15 @@ export const MEDIA: Readonly<Record<MediaId, MediaAsset>> = {
     ]
   }
 } as const;
+
+/** Hero slideshow, in declared order. The first entry is the LCP image. */
+export const HERO_MEDIA: readonly MediaAsset[] = [
+  MEDIA['hero'],
+  MEDIA['exterior-evening'],
+  MEDIA['exterior-entrance'],
+  MEDIA['exterior-walkway'],
+  MEDIA['exterior-sunset'],
+];
 
 export const GALLERY_MEDIA: readonly MediaAsset[] = [
   MEDIA['overview-aerial'],

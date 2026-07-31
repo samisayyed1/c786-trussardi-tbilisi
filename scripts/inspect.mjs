@@ -62,9 +62,15 @@ async function audit(page, viewport) {
 
   // Images without meaningful alt text.
   const missingAlt = await page.evaluate(
-    () => [...document.querySelectorAll('img')].filter((img) => !img.alt || img.alt.trim().length < 5).length,
+    () =>
+      [...document.querySelectorAll('img')].filter((img) => {
+        // alt="" is a deliberate decorative marker and passes.
+        if (!img.hasAttribute('alt')) return true;
+        const alt = img.getAttribute('alt') ?? '';
+        return alt.length > 0 && alt.trim().length < 5;
+      }).length,
   );
-  if (missingAlt > 0) note(viewport.name, `${missingAlt} image(s) with missing/short alt text`);
+  if (missingAlt > 0) note(viewport.name, `${missingAlt} image(s) with missing or too-short alt text`);
 
   // Touch targets below 44px on mobile widths.
   if (viewport.mobile) {

@@ -3,8 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowDown } from 'lucide-react';
 import { HERO_COPY, HERO_FACTS } from '../content/site';
-import { MEDIA } from '../content/media-manifest';
-import { Picture } from './ui/Picture';
+import { HeroSlideshow } from './HeroSlideshow';
 import { PrimaryCta, WhatsAppCta } from './ui/Cta';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 
@@ -79,15 +78,10 @@ export function Hero({ ready }: HeroProps) {
       className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden pt-28 pb-10 md:pb-14"
     >
       <div ref={mediaRef} className="absolute inset-0 -z-10 will-change-transform">
-        {/* Phones get an art-directed portrait render (see media.config);
-            the landscape original composes badly in a tall viewport. */}
-        <Picture
-          asset={MEDIA.hero}
-          priority
-          sizes="100vw"
-          className="h-full w-full"
-          imgClassName="object-cover object-center"
-        />
+        {/* Five renders crossfading. Phones get art-directed portrait sources
+            for each (see media.config); the landscape originals compose badly
+            in a tall viewport. */}
+        <HeroSlideshow />
       </div>
 
       {/* Multi-stop cinematic ramp — see `hero-scrim` in index.css for why a
