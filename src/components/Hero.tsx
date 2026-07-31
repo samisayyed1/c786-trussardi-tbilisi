@@ -125,12 +125,17 @@ export function Hero({ ready }: HeroProps) {
         {/* Three facts on a phone, all five once there is width for them. The
             value leads at display size with the label beneath — an editorial
             line separated by hairlines, not a boxed spec bar. */}
-        <dl className="mt-9 flex items-start sm:mt-12 sm:flex-wrap sm:gap-y-6 md:mt-14">
+        {/* Centred on phones, where the three facts read as one balanced band;
+            left-aligned from `sm` up so they sit on the same axis as the
+            headline and copy. Note `sm:first:pl-0` rather than `first:pl-0` —
+            stripping the first cell's padding on mobile would push the whole
+            group off centre. */}
+        <dl className="mt-9 flex items-start justify-center sm:mt-12 sm:flex-wrap sm:justify-start sm:gap-y-6 md:mt-14">
           {HERO_FACTS.map((fact) => (
             <div
               data-hero="fact"
               key={fact.label}
-              className={`min-w-0 border-l border-white/15 px-3 first:border-l-0 first:pl-0 sm:px-7 ${
+              className={`min-w-0 border-l border-white/15 px-3 text-center first:border-l-0 sm:px-7 sm:text-left sm:first:pl-0 ${
                 fact.compact ? '' : 'hidden sm:block'
               }`}
             >
